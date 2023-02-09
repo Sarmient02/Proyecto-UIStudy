@@ -12,7 +12,16 @@ const UserSchema = new Schema({
     password: {
         type: String,
         required: true,
+    },
+    name: {
+        type: String,
+        required: false
+    },
+    codigo: {
+        type: Number,
+        required: false
     }
+
 })
 
 UserSchema.pre('save', async function (next) {

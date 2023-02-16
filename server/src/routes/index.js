@@ -12,13 +12,20 @@ router.get('/', (req, res) => {
 });
 
 router.post('/signup', async (req, res) => {
-    const { email, password } = req.body;
-    const newUser = new User({email, password});
-    const user = await User.findOne({email});
-    if (user) return res.status(401).send('The email already exists');
+    const { email, username, password } = req.body;
+    const newUser = new User({email, username, password});
+    const useremail = await User.findOne({email});
+    const usern = await User.findOne({username});
+    if (useremail) return res.status(401).send('The email already exists');
+    if (usern) return res.status(401).send('The username already exists');
     await newUser.save();
 		const token = await jwt.sign({_id: newUser._id}, 'secretkey');
     res.status(200).json({token});
+});
+
+router.get('/users', verifyToken, async (req, res) => {
+    const users = await User.findById(req.userId);
+    res.json(users);
 });
 
 router.post('/login', async (req, res) => {
@@ -29,7 +36,7 @@ router.post('/login', async (req, res) => {
     const validate = await user.isValidPassword(password);
     if (!validate) return res.status(401).send('Wrong Password');
 
-		const token = jwt.sign({_id: user._id}, 'secretkey');
+		const token = jwt.sign({_id: user._id, username: user.username}, 'secretkey');
 
     return res.status(200).json({token});
 });
@@ -148,6 +155,7 @@ async function verifyToken(req, res, next) {
 			return res.status(401).send('Unauhtorized Request');
 		}
 		req.userId = payload._id;
+        req.username = payload.username;
 		next();
 	} catch(e) {
 		//console.log(e)

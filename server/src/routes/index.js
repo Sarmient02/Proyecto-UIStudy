@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const router = Router();
 const multer = require('multer');
+const path = require('path');
 
 const User = require('../models/User');
 const Document = require('../models/Document');
@@ -128,17 +129,23 @@ router.post('/upload', verifyToken, upload.single('myFile'), async (req, res) =>
     res.status(200).json({newDocument});
 });
 
-/*
-router.post('/signup', async (req, res) => {
-    const { email, password } = req.body;
-    const newUser = new User({email, password});
-    const user = await User.findOne({email});
-    if (user) return res.status(401).send('The email already exists');
-    await newUser.save();
-		const token = await jwt.sign({_id: newUser._id}, 'secretkey');
-    res.status(200).json({token});
+//Descargar archivos con multer
+router.post('/download/', (req, res) => {
+    filepath = path.join(__dirname, '../../public');
+    Document.findById(req.body.id).then((result) => {
+        res.sendFile(path.join(filepath, result.file.filename));
+    }).catch((err) => {
+        console.log(err)
+    })
 });
-*/
+
+router.get('/url/:id', (req, res) => {
+    Document.findById(req.params.id).then((result) => {
+        res.send(path.join(result.file.filename));
+    }).catch((err) => {
+        console.log(err)
+    })
+});
 
 async function verifyToken(req, res, next) {
 	try {

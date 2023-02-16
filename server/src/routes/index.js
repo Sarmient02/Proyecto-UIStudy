@@ -1,50 +1,158 @@
-const express = require('express')
-const router = express.Router()
+const { Router } = require('express');
+const router = Router();
+const multer = require('multer');
 
-const passport = require('passport')
-const jwt = require('jsonwebtoken')
+const User = require('../models/User');
+const Document = require('../models/Document');
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-    res.send('Hello world')
-})
+const jwt = require('jsonwebtoken');
 
-router.post('/signup', passport.authenticate('signup', { session: false }), async (req, res, next) => {
-    res.json({
-      message: 'Signup successful',
-      user: req.user,
-    })
-})
+router.get('/', (req, res) => {
+    res.send('hello')
+});
 
-router.post('/login', async (req, res, next) => {
-  passport.authenticate('login', async (err, user, info) => {
-    try {
-      if (err || !user) {
+router.post('/signup', async (req, res) => {
+    const { email, password } = req.body;
+    const newUser = new User({email, password});
+    const user = await User.findOne({email});
+    if (user) return res.status(401).send('The email already exists');
+    await newUser.save();
+		const token = await jwt.sign({_id: newUser._id}, 'secretkey');
+    res.status(200).json({token});
+});
+
+router.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({email});
+    if (!user) return res.status(401).send('The email doen\' exists');
+    const validate = await user.isValidPassword(password);
+    if (!validate) return res.status(401).send('Wrong Password');
+
+		const token = jwt.sign({_id: user._id}, 'secretkey');
+
+    return res.status(200).json({token});
+});
+
+router.get('/tasks', (req, res) => {
+    res.json([
+        {
+            _id: '1',
+            name: "task one",
+            description: 'asdadasd',
+            date: "2019-11-06T15:50:18.921Z"
+        },
+        {
+            _id: '2',
+            name: "task two",
+            description: 'asdadasd',
+            date: "2019-11-06T15:50:18.921Z"
+        },
+        {
+            _id: '3',
+            name: "task three",
+            description: 'asdadasd',
+            date: "2019-11-06T15:50:18.921Z"
+        },
+    ])
+});
+
+router.get('/private-tasks', verifyToken, (req, res) => {
+    res.json([
+        {
+            _id: '1',
+            name: "task one",
+            description: 'asdadasd',
+            date: "2019-11-06T15:50:18.921Z"
+        },
+        {
+            _id: '2',
+            name: "task two",
+            description: 'asdadasd',
+            date: "2019-11-06T15:50:18.921Z"
+        },
+        {
+            _id: '3',
+            name: "task three",
+            description: 'asdadasd',
+            date: "2019-11-06T15:50:18.921Z"
+        },
+    ])
+});
+
+router.get('/documentos', (req, res) => {
+    Document.find().then((result) => {
+        res.send(result)
+    }).catch((err) => {
         console.log(err)
-        const error = new Error('new Error')
-        return next(error)
-      }
-
-      req.login(user, { session: false }, async (err) => {
-        if (err) return next(err)
-        const body = { _id: user._id, email: user.email }
-
-        const token = jwt.sign({ user: body }, 'top_secret')
-        return res.json({ token })
-      })
-    }
-    catch(e) {
-      return next(e)
-    }
-  })(req, res, next)
-})
-
-router.get('/profile', passport.authenticate('jwt', { session: false }), (req, res, next) => {
-    res.json({
-        message: 'You did it!',
-        user: req.user,
-        token: req.query.secret_token,
     })
-})
+});
 
-module.exports = router
+router.get('/documentos', (req, res) => {
+    Document.findById(req.id).then((result) => {
+        res.send(result)
+    }).catch((err) => {
+        console.log(err)
+    })
+});
+
+//Subir archivos con multer
+const storage = multer.diskStorage({
+    filename: (req, file, cb) => {
+        const ext = file.originalname.split('.').pop();
+        const namef = file.originalname.replace(/[^\x00-\x7F]/g,'');
+        const filename = (namef.split(" ").join("-")) + "-" + Date.now();
+        cb(null, `${filename}.${ext}`);
+    },
+    destination: (req, file, cb) => {
+        cb(null, './public');
+    }
+});
+
+const upload = multer({storage});
+
+router.post('/upload', verifyToken, upload.single('myFile'), async (req, res) => {
+    const file = req.file;
+    const { title, description, content, id_carrera, id_materia } = req.body;
+    const id_user = req.userId;
+    const newDocument = new Document({id_user, file, title, description, content, id_carrera, id_materia});
+    await newDocument.save();
+    console.log(req.body.id_materia)
+    res.status(200).json({newDocument});
+});
+
+/*
+router.post('/signup', async (req, res) => {
+    const { email, password } = req.body;
+    const newUser = new User({email, password});
+    const user = await User.findOne({email});
+    if (user) return res.status(401).send('The email already exists');
+    await newUser.save();
+		const token = await jwt.sign({_id: newUser._id}, 'secretkey');
+    res.status(200).json({token});
+});
+*/
+
+async function verifyToken(req, res, next) {
+	try {
+		if (!req.headers.authorization) {
+			return res.status(401).send('Unauhtorized Request');
+		}
+		let token = req.headers.authorization.split(' ')[1];
+		if (token === 'null') {
+			return res.status(401).send('Unauhtorized Request');
+		}
+
+		const payload = await jwt.verify(token, 'secretkey');
+		if (!payload) {
+			return res.status(401).send('Unauhtorized Request');
+		}
+		req.userId = payload._id;
+		next();
+	} catch(e) {
+		//console.log(e)
+		return res.status(401).send('Unauhtorized Request');
+	}
+}
+
+module.exports = router;

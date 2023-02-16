@@ -88,8 +88,8 @@ router.get('/documentos', (req, res) => {
     })
 });
 
-router.get('/documentos', (req, res) => {
-    Document.findById(req.id).then((result) => {
+router.get('/documentos/:id', (req, res) => {
+    Document.findById(req.params.id).then((result) => {
         res.send(result)
     }).catch((err) => {
         console.log(err)

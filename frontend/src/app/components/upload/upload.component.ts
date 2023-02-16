@@ -31,6 +31,16 @@ export class UploadComponent {
     id_materia: ''
   }
 
+  usuario: any = {};
+
+
+  
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private documentosService: DocumentosService,
+    ) { }
+
   ngOnInit(): void {
     this.carreras = [
       {id: 1, name: 'Ingeniería en Sistemas Computacionales'},
@@ -53,13 +63,15 @@ export class UploadComponent {
       {id: 8, name: 'Taller de Investigación II'}
     ];
 
+    this.authService.getUser()
+    .subscribe(
+      res => {
+        this.usuario = res;
+      },
+      err => console.log(err)
+    )
+
   }
-  
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-    private documentosService: DocumentosService,
-    ) { }
 
   fileTmp: any;
 

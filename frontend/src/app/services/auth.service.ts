@@ -37,4 +37,8 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
+  getUser(){
+    return this.http.get<any>(this.URL + '/users');
+  }
+
 }

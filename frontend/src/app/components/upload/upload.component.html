@@ -1,0 +1,31 @@
+<section class="py-5 mt-5">
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-md-8 col-xl-6 text-center mx-auto">
+                <h2 class="display-6 fw-bold mb-4">¡Hola, !</h2>
+                <p class="text-muted">¿Quieres subir un documento?</p>
+            </div>
+        </div>
+        <div class="row d-flex justify-content-center">
+            <div class="col-md-6">
+                <div>
+                    <form class="p-3 p-xl-4" (submit)="uploadFile()">
+                        <div class="mb-3"><input class="form-control" type="file" (change)="getFile($event)"></div>
+                        <div class="mb-3"><input [(ngModel)]="document.title" class="shadow form-control" type="text" id="title" name="title" placeholder="Título"></div>
+                        <div class="mb-3"><input [(ngModel)]="document.description" class="shadow form-control" type="text" id="description" name="description" placeholder="Descripción"></div>
+                        <div class="mb-3"><select (change)="ChangeCarrera($event)" class="form-select" required>
+                                    <option default disabled>Carrera</option>
+                                    <option *ngFor="let carrera of carreras" [value]="carrera.id">{{carrera.name}}</option>
+                            </select></div>
+                        <div class="mb-3"><select (change)="ChangeMateria($event)" class="form-select" required>
+                                    <option default disabled>Materia</option>
+                                    <option *ngFor="let materia of materias" [value]="materia.id">{{materia.name}}</option>
+                            </select></div>
+                        <div class="mb-3"><textarea [(ngModel)]="document.content" class="shadow form-control" id="message" name="message" rows="6" placeholder="Contenido"></textarea></div>
+                        <div><button class="btn btn-primary shadow d-block w-100" type="submit">Enviar</button></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

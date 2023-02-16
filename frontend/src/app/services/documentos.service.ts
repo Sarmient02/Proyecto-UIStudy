@@ -38,4 +38,8 @@ export class DocumentosService {
     return this.http.get<any>(this.URL + '/documentos/' + id);
   }
 
+  downloadFile(id: string){
+    return this.http.get<any>(this.URL + '/download/' + id);
+  }
+
 }

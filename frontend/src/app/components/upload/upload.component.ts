@@ -93,7 +93,12 @@ export class UploadComponent {
     body.append('id_materia', this.document.id_materia);
     console.log(this.document)
     this.documentosService.sendFile(body)
-    .subscribe(res => console.log(res));
+    .subscribe(res => {
+      console.log(res);
+      this.router.navigate(['/documentos']);
+    },
+    err => console.log(err)
+    );
   }
 
   ChangeMateria($event: any) {

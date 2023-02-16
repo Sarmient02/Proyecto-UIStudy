@@ -6,7 +6,7 @@
 /out-tsc
 /bazel-out
 
-/upload
+/server/public/*
 
 # Node
 /node_modules

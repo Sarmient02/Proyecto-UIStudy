@@ -22,7 +22,7 @@
                         <div>
                             <h6 class="fw-bold text-muted">{{documento.title}}</h6>
                             <p>{{documento.description}}</p>
-                        </div><a class="btn btn-primary" role="button" [href]="documento._id">Ver</a>
+                        </div><a class="btn btn-primary" role="button" [routerLink]="['../view', documento._id]">Ver</a>
                     </div>
                 </div>
             </div>

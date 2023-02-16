@@ -33,4 +33,9 @@ export class DocumentosService {
     return this.http.get<any>(this.URL + '/documentos');
   }
 
+  getDocument(id: string){
+    console.log(id)
+    return this.http.get<any>(this.URL + '/documentos/' + id);
+  }
+
 }

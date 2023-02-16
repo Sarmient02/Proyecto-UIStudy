@@ -7,9 +7,10 @@ import { DocumentosService } from 'src/app/services/documentos.service';
   templateUrl: './view.component.html',
   styleUrls: ['./view.component.css']
 })
-export class ViewComponent {
+export class ViewComponent implements OnInit {
 
-  documentoId!: string | null;
+  documento: any = {};
+  documentoId: any;
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -19,6 +20,13 @@ export class ViewComponent {
   ngOnInit(): void {
     this.documentoId = this.activatedRoute.snapshot.paramMap.get('id');
     this.documentosService.getDocument(this.documentoId)
+    .subscribe(
+      res => {
+        this.documento = res;
+      },
+      err => console.log(err)
+    );
+    console.log(this.documento)
   }
 
 }

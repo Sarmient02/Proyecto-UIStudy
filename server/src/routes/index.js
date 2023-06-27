@@ -131,7 +131,7 @@ router.post('/upload', verifyToken, upload.single('myFile'), async (req, res) =>
 
 //Descargar archivos con multer
 router.post('/download/', (req, res) => {
-    filepath = path.join(__dirname, '../../public');
+    filepath = path.join(__dirname, '../public');
     Document.findById(req.body.id).then((result) => {
         res.sendFile(path.join(filepath, result.file.filename));
     }).catch((err) => {
